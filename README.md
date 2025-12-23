@@ -1,181 +1,53 @@
 # AutoCommit
 
-Автоматическая генерация сообщений коммитов Git с использованием AI (Google Gemini).
+Automated Git commit message generation using AI (Google Gemini).
 
-## Архитектура проекта
+## Installation
 
-Проект использует **модульную архитектуру** с четким разделением ответственности (Separation of Concerns). Каждый модуль отвечает за свою область функциональности, что обеспечивает:
-
-- ✅ **Расширяемость** - легко добавлять новые функции
-- ✅ **Тестируемость** - каждый модуль можно тестировать независимо
-- ✅ **Поддерживаемость** - понятная структура кода
-- ✅ **Переиспользуемость** - модули можно использовать отдельно
-
-### Схема взаимодействия модулей
-
-```
-┌─────────────┐
-│   main.py   │  (Точка входа)
-└──────┬──────┘
-       │
-       ▼
-┌─────────────┐
-│    cli.py   │  (CLI интерфейс, координация)
-└──────┬──────┘
-       │
-   ┌───┴───┬──────────┬──────────────┐
-   ▼       ▼          ▼              ▼
-┌─────────┐ ┌──────────┐ ┌──────────┐ ┌─────────┐
-│  git_   │ │ analyzer │ │generator │ │ config  │
-│ handler │ │          │ │          │ │         │
-└─────────┘ └──────────┘ └──────────┘ └─────────┘
-    │            │            │            │
-    │            └──────┬─────┘            │
-    │                   │                  │
-    └───────────────────┴──────────────────┘
-                    │
-              (Google Gemini AI)
-```
-
-### Структура директорий
-
-```
-AutoCommit/
-├── autocommit/           # Основной пакет
-│   ├── __init__.py       # Инициализация пакета
-│   ├── git_handler.py    # Работа с Git репозиторием
-│   ├── analyzer.py       # Анализ изменений
-│   ├── generator.py      # Генерация коммитов через AI
-│   ├── config.py         # Управление конфигурацией
-│   └── cli.py            # CLI интерфейс
-├── main.py               # Точка входа
-├── requirements.txt      # Зависимости
-└── README.md            # Документация
-```
-
-### Модули
-
-#### 1. `git_handler.py` - Работа с Git
-**Ответственность:** Взаимодействие с Git репозиторием
-- Получение статуса изменений
-- Получение diff изменений
-- Добавление файлов в staging
-- Создание коммитов
-
-**Классы:**
-- `GitHandler` - основной класс для работы с Git
-- `NotAGitRepositoryError` - исключение для ошибок репозитория
-
-#### 2. `analyzer.py` - Анализ изменений
-**Ответственность:** Анализ и подготовка данных об изменениях
-- Анализ статуса файлов
-- Генерация краткого описания изменений
-- Подготовка контекста для AI генератора
-
-**Классы:**
-- `ChangeAnalyzer` - анализ изменений и подготовка контекста
-
-#### 3. `generator.py` - Генерация коммитов
-**Ответственность:** Генерация сообщений коммитов через AI
-- Формирование промптов для AI
-- Генерация сообщений на разных языках
-- Обработка ошибок генерации
-
-**Классы:**
-- `CommitMessageGenerator` - генератор коммитов через Google Gemini
-- `CommitGenerationError` - исключение для ошибок генерации
-
-#### 4. `config.py` - Конфигурация
-**Ответственность:** Управление настройками приложения
-- Загрузка конфигурации из переменных окружения
-- Настройки по умолчанию
-- Валидация конфигурации
-
-**Классы:**
-- `Config` - управление конфигурацией
-
-#### 5. `cli.py` - CLI интерфейс
-**Ответственность:** Пользовательский интерфейс командной строки
-- Парсинг аргументов командной строки
-- Координация работы всех модулей
-- Интерактивное подтверждение коммита
-
-## Принципы архитектуры
-
-1. **Разделение ответственности (Separation of Concerns)**
-   - Каждый модуль отвечает за свою область
-   - Минимальная связанность между модулями
-
-2. **Расширяемость**
-   - Легко заменить генератор AI
-   - Можно добавить поддержку других AI моделей
-   - Гибкая система конфигурации
-
-3. **Тестируемость**
-   - Каждый модуль можно тестировать независимо
-   - Зависимости передаются через конструкторы
-
-4. **Простота использования**
-   - Интуитивный CLI интерфейс
-   - Понятные сообщения об ошибках
-
-## Установка
-
-1. Активируйте виртуальную среду:
+1. Create and activate virtual environment:
 ```bash
-source venv/bin/activate
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 ```
 
-2. Установите зависимости:
+2. Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
-3. Установите API ключ Google Gemini:
+3. Set your Google Gemini API key:
 ```bash
 export GOOGLE_API_KEY="your-api-key"
-# или
+# or
 export GEMINI_API_KEY="your-api-key"
 ```
 
-## Использование
+## Usage
 
-### Базовое использование
+Basic usage:
 ```bash
-python main.py
+python -m autocommit.cli
 ```
 
-### С параметрами
+With options:
 ```bash
-# Генерация коммита на английском
-python main.py --lang en
+# Generate commit in English
+python -m autocommit.cli --lang en
 
-# Добавить все файлы в staging перед анализом
-python main.py --stage
+# Stage all files before analysis
+python -m autocommit.cli --stage
 
-# Только показать сообщение, не создавать коммит
-python main.py --no-commit
+# Show message only, don't commit
+python -m autocommit.cli --no-commit
 
-# Указать модель AI
-python main.py --model gemini-3-flash-preview
-
-# Указать API ключ
-python main.py --api-key your-api-key
+# Specify AI model
+python -m autocommit.cli --model gemini-3-flash-preview
 ```
 
-## Переменные окружения
+## Environment Variables
 
-- `GOOGLE_API_KEY` или `GEMINI_API_KEY` - API ключ для Google Gemini
-- `AUTOCOMMIT_MODEL` - модель AI (по умолчанию: gemini-3-flash-preview)
-- `AUTOCOMMIT_LANGUAGE` - язык коммитов (ru/en, по умолчанию: ru)
-- `AUTOCOMMIT_AUTO_STAGE` - автоматически добавлять файлы в staging (true/false)
-- `AUTOCOMMIT_AUTO_COMMIT` - автоматически создавать коммит без подтверждения (true/false)
-
-## Разработка
-
-Проект спроектирован для легкого расширения:
-
-- **Добавление новых AI провайдеров:** создайте новый класс генератора в `generator.py` или отдельный модуль
-- **Улучшение анализа:** расширьте `ChangeAnalyzer` для более детального анализа
-- **Дополнительные функции Git:** добавьте методы в `GitHandler`
-
+- `GOOGLE_API_KEY` or `GEMINI_API_KEY` - Google Gemini API key
+- `AUTOCOMMIT_MODEL` - AI model (default: gemini-3-flash-preview)
+- `AUTOCOMMIT_LANGUAGE` - Commit language (ru/en, default: ru)
+- `AUTOCOMMIT_AUTO_STAGE` - Auto stage files (true/false)
+- `AUTOCOMMIT_AUTO_COMMIT` - Auto commit without confirmation (true/false)
